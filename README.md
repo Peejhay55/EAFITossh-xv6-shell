@@ -38,20 +38,37 @@ Para compilar y ejecutar xv6 y la shell EAFITossh, se requiere:
 ## Guía paso a paso para correr la shell EAFITossh
 Siga estos pasos para iniciar la shell personalizada dentro del entorno de xv6:
 
-1. **Compilar y arrancar xv6:**
-   Abra una terminal en la raíz del proyecto y ejecute:
+### Antes de: 
+a) Clonar o descargar el repositorio
    ```bash
+   git clone https://github.com/Peejhay55/EAFITossh-xv6-shell
+   ```
+b) abrir terminal de Ubuntu (o entorno Linux/Unix
+
+c) pararse en la ruta de xv6-riscv
+   ```bash
+   cd xv6-riscv
+   ```
+
+### Ejecución
+
+1. **Compilar y arrancar xv6:**
+   Estando en la raiz del proyecto, ejecutar:
+   ```bash
+   make clean
    make qemu
    ```
 2. **Iniciar EAFITossh:**
    Una vez que xv6 haya cargado y aparezca el prompt original `$`, escriba el nombre del programa:
    ```bash
-   EAFITossh
+   $EAFITossh
    ```
 3. **Uso de la shell:**
    Ya dentro de `EAFITossh`, podrá ver el banner de bienvenida y empezar a usar los comandos descritos. Escriba `ayuda` para ver la lista en cualquier momento.
 
 ---
+
+### Referencia al README anterior del repositorio del MIT
 
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
