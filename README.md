@@ -23,11 +23,6 @@ La shell `EAFITossh` implementa diversos comandos internos (built-ins) y soporta
 - `buscar <texto> <archivo>`: Busca coincidencias de una palabra en un archivo.
 - `estadisticas <archivo>`: Muestra información detallada (tamaño, tipo, inodo) del archivo.
 
-### Funcionalidades de Procesos
-- **Redirección:** Soporte para `<` y `>`.
-- **Tuberías (Pipes):** Uso de `|` para comunicar procesos.
-- **Ejecución en segundo plano:** Uso de `&`.
-- **Listas de comandos:** Ejecución secuencial usando `;`.
 
 ## Pre-requisitos
 Para compilar y ejecutar xv6 y la shell EAFITossh, se requiere:
