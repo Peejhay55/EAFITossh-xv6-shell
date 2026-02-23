@@ -1,4 +1,4 @@
-# EAFITossh - xv6 Shell Customization
+# EAFITossh - xv6 Shell 
 
 **Autor:** Pablo José Benítez Trujillo
 **Clase:** Sistemas Operativos C2661-SI2004-4787
