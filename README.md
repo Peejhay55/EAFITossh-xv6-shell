@@ -46,9 +46,9 @@ a) Clonar o descargar el repositorio
    ```
 b) abrir terminal de Ubuntu (o entorno Linux/Unix
 
-c) pararse en la ruta de xv6-riscv
+c) pararse en la ruta de xv6-riscv (en este caso es el nombre del repositorio)
    ```bash
-   cd xv6-riscv
+   cd EAFITossh-xv6-shell
    ```
 
 ### Ejecución
