@@ -145,8 +145,6 @@ UPROGS=\
 	$U/_logstress\
 	$U/_forphan\
 	$U/_dorphan\
-        $U/_pipes\
-        $U/_pingpong\
         $U/_EAFITossh\
 
 fs.img: mkfs/mkfs README $(UPROGS)
