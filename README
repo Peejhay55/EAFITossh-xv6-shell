@@ -1,3 +1,56 @@
+# EAFITossh - xv6 Shell Customization
+
+**Autor:** Pablo José Benítez Trujillo
+**Clase:** Sistemas Operativos C2661-SI2004-4787
+
+## Métodos que usa la shell
+La shell `EAFITossh` implementa diversos comandos internos (built-ins) y soporta funcionalidades avanzadas de Unix:
+
+### Comandos Internos
+- `cd [ruta]`: Cambia el directorio de trabajo.
+- `help` / `ayuda`: Muestra la lista de comandos disponibles.
+- `exit` / `salir`: Finaliza la sesión de la shell.
+- `listar [ruta]`: Muestra los archivos y carpetas en el directorio actual.
+- `leer <archivo>`: Muestra el contenido de un archivo de texto.
+- `tiempo`: Muestra la fecha y hora actual (formato 12h y AM/PM, ajustado para Colombia UTC-5).
+- `calc <n1> <op> <n2>`: Calculadora básica para enteros (+, -, *, /, %).
+- `crear <archivo>`: Crea un archivo nuevo vacío.
+- `eliminar <archivo>`: Borra un archivo tras una confirmación del usuario.
+- `renombrar <viejo> <nuevo>`: Cambia el nombre de un archivo.
+- `copiar <origen> <destino>`: Duplica un archivo.
+- `mover <origen> <destino>`: Traslada o renombra un archivo.
+- `buscar <texto> <archivo>`: Busca coincidencias de una palabra en un archivo.
+- `estadisticas <archivo>`: Muestra información detallada (tamaño, tipo, inodo) del archivo.
+
+### Funcionalidades de Procesos
+- **Redirección:** Soporte para `<` y `>`.
+- **Tuberías (Pipes):** Uso de `|` para comunicar procesos.
+- **Ejecución en segundo plano:** Uso de `&`.
+- **Listas de comandos:** Ejecución secuencial usando `;`.
+
+## Pre-requisitos
+Para compilar y ejecutar xv6 y la shell EAFITossh, se requiere:
+1. Una cadena de herramientas (toolchain) RISC-V "newlib" (por ejemplo, `riscv64-unknown-elf-gcc`).
+2. QEMU configurado para la arquitectura `riscv64-softmmu`.
+
+## Guía paso a paso para correr la shell EAFITossh
+Siga estos pasos para iniciar la shell personalizada dentro del entorno de xv6:
+
+1. **Compilar y arrancar xv6:**
+   Abra una terminal en la raíz del proyecto y ejecute:
+   ```bash
+   make qemu
+   ```
+2. **Iniciar EAFITossh:**
+   Una vez que xv6 haya cargado y aparezca el prompt original `$`, escriba el nombre del programa:
+   ```bash
+   EAFITossh
+   ```
+3. **Uso de la shell:**
+   Ya dentro de `EAFITossh`, podrá ver el banner de bienvenida y empezar a usar los comandos descritos. Escriba `ayuda` para ver la lista en cualquier momento.
+
+---
+
 xv6 is a re-implementation of Dennis Ritchie's and Ken Thompson's Unix
 Version 6 (v6).  xv6 loosely follows the structure and style of v6,
 but is implemented for a modern RISC-V multiprocessor using ANSI C.
