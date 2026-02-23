@@ -30,12 +30,10 @@ La shell `EAFITossh` implementa diversos comandos internos (built-ins) y soporta
 
 ## Pre-requisitos
 Para compilar y ejecutar xv6 y la shell EAFITossh, se requiere:
-1. Una cadena de herramientas (toolchain) RISC-V "newlib" (por ejemplo, `riscv64-unknown-elf-gcc`).
-2. QEMU configurado para la arquitectura `riscv64-softmmu`.
-3. Entorno Linux/Unix (probado en Ubuntu).
-4. RISC-V GNU toolchain (riscv64-unknown-elf-gcc), compatible con C11.
-5. GNU Make.
-6. QEMU configurado para RISC-V (qemu-system-riscv64, riscv64-softmmu).
+1. Entorno Linux/Unix (probado en Ubuntu).
+2. RISC-V GNU toolchain (riscv64-unknown-elf-gcc), compatible con C11.
+3. GNU Make.
+4. QEMU configurado para RISC-V (qemu-system-riscv64, riscv64-softmmu).
 
 ## Guía paso a paso para correr la shell EAFITossh
 Siga estos pasos para iniciar la shell personalizada dentro del entorno de xv6:
