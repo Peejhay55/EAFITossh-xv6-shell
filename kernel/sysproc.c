@@ -107,3 +107,16 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// return seconds since Unix epoch from the Goldfish RTC
+// that QEMU's virt machine provides at 0x101000.
+uint64
+sys_rtctime(void)
+{
+  // TIME_LOW at offset 0, TIME_HIGH at offset 4 (nanoseconds).
+  volatile uint32 *rtc = (volatile uint32 *)RTC0;
+  uint64 lo = rtc[0];   // reading TIME_LOW latches TIME_HIGH
+  uint64 hi = rtc[1];
+  uint64 ns = (hi << 32) | lo;
+  return ns / 1000000000ULL;  // convert ns -> seconds
+}
