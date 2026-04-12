@@ -21,3 +21,9 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_rtctime 22
+#define SYS_shm_open 23
+#define SYS_shm_close 24
+#define SYS_hello 25
+#define SYS_trace 26
+#define SYS_dumpvm 27
+#define SYS_map_ro 28

@@ -102,6 +102,12 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_rtctime(void);
+extern uint64 sys_shm_open(void);
+extern uint64 sys_shm_close(void);
+extern uint64 sys_hello(void);
+extern uint64 sys_trace(void);
+extern uint64 sys_dumpvm(void);
+extern uint64 sys_map_ro(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -128,6 +134,44 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_rtctime] sys_rtctime,
+[SYS_shm_open] sys_shm_open,
+[SYS_shm_close] sys_shm_close,
+[SYS_hello]   sys_hello,
+[SYS_trace]   sys_trace,
+[SYS_dumpvm]  sys_dumpvm,
+[SYS_map_ro]  sys_map_ro,
+};
+
+// EAFITos: Nombres de las syscalls para strace
+static const char *syscall_names[] = {
+[SYS_fork]    "fork",
+[SYS_exit]    "exit",
+[SYS_wait]    "wait",
+[SYS_pipe]    "pipe",
+[SYS_read]    "read",
+[SYS_kill]    "kill",
+[SYS_exec]    "exec",
+[SYS_fstat]   "fstat",
+[SYS_chdir]   "chdir",
+[SYS_dup]     "dup",
+[SYS_getpid]  "getpid",
+[SYS_sbrk]    "sbrk",
+[SYS_pause]   "pause",
+[SYS_uptime]  "uptime",
+[SYS_open]    "open",
+[SYS_write]   "write",
+[SYS_mknod]   "mknod",
+[SYS_unlink]  "unlink",
+[SYS_link]    "link",
+[SYS_mkdir]   "mkdir",
+[SYS_close]   "close",
+[SYS_rtctime] "rtctime",
+[SYS_shm_open] "shm_open",
+[SYS_shm_close] "shm_close",
+[SYS_hello]   "hello",
+[SYS_trace]   "trace",
+[SYS_dumpvm]  "dumpvm",
+[SYS_map_ro]  "map_ro",
 };
 
 void
@@ -138,8 +182,40 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    // EAFITos: Argumento 0 guardado por si queremos imprimirlo luego (simplificado).
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
+
+    // EAFITos: Evaluar la máscara antes de ejecutar el handler
+    if (p->trace_mask & (1 << num)) {
+      uint64 r_a0 = p->trapframe->a0;
+      uint64 r_a1 = p->trapframe->a1;
+      uint64 r_a2 = p->trapframe->a2;
+      uint64 r_a3 = p->trapframe->a3;
+      uint64 r_a4 = p->trapframe->a4;
+      uint64 r_a5 = p->trapframe->a5;
+
+      int arg0, arg1, arg2;
+      argint(0, &arg0);
+      argint(1, &arg1);
+      argint(2, &arg2);
+      
+      uint64 ptr0;
+      argaddr(0, &ptr0);
+
+      int pid = p->pid;
+      const char *name = syscall_names[num] ? syscall_names[num] : "unknown";
+      
+      // EAFITos: Hack para no imprimir los writes() que hace el printf interno
+      // porque si traceamos write, nuestro propio printf llamará write y creará 
+      // un ciclo infinito de ruido o muchísimos prints
+      if(num != SYS_write || p->name[0] != 't' || p->name[1] != 'u' || p->name[2] != 'a') {
+        printf("%d %s: syscall %s (num=%d)\n", pid, p->name, name, num);
+        printf("  RAW (a0-a5): 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx\n", r_a0, r_a1, r_a2, r_a3, r_a4, r_a5);
+        printf("  DECODED args: argint(0,1,2)=%d, %d, %d | argaddr(0)=0x%lx\n", arg0, arg1, arg2, ptr0);
+      }
+    }
+
     p->trapframe->a0 = syscalls[num]();
   } else {
     printf("%d %s: unknown sys call %d\n",

@@ -53,6 +53,10 @@ usertrap(void)
   
   if(r_scause() == 8){
     // system call
+    // EAFITos: Loggear scause y número de syscall
+    if(p->trapframe->a7 == 25){ // SYS_hello = 25
+      printf("usertrap(): syscall scause=%d num=%d\n", (int)r_scause(), (int)p->trapframe->a7);
+    }
 
     if(killed(p))
       kexit(-1);
@@ -72,8 +76,13 @@ usertrap(void)
             vmfault(p->pagetable, r_stval(), (r_scause() == 13)? 1 : 0) != 0) {
     // page fault on lazily-allocated page
   } else {
-    printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
-    printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
+    // EAFITos: store page fault detection
+    if(r_scause() == 15){
+      printf("usertrap(): store page fault scause=%d stval=0x%p\n", (int)r_scause(), (void*)r_stval());
+    } else {
+      printf("usertrap(): unexpected scause %p pid=%d\n", (void*)r_scause(), p->pid);
+      printf("            sepc=%p stval=%p\n", (void*)r_sepc(), (void*)r_stval());
+    }
     setkilled(p);
   }
 

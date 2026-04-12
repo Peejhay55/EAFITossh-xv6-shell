@@ -21,3 +21,6 @@
 #define KSTACK(p) (TRAMPOLINE - ((p)+1)* 2*PGSIZE)
 
 #define TRAPFRAME (TRAMPOLINE - PGSIZE)
+
+// One user page reserved for explicit shared-memory mapping.
+#define SHM_VA (TRAPFRAME - PGSIZE)

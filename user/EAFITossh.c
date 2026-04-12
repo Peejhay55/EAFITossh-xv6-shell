@@ -252,6 +252,7 @@ struct help_entry help_table[] = {
   { "tiempo",       "Muestra la fecha y hora actual"            },
   { "calc",         "Calculadora basica (calc N1 op N2)"        },
   { "ayuda",        "Muestra lista de comandos"                 },
+  { "hello",        "Llama a la syscall hello del kernel"       },
   { "salir",        "Termina la shell"                          },
   { "crear",        "Crea archivo vacio"                        },
   { "eliminar",     "Elimina archivo con confirmacion"          },
@@ -324,6 +325,14 @@ builtin_ayuda(void)
     fprintf(1, " %s\n", h->desc);
   }
   fprintf(1, "\n  Otros comandos se buscan en el sistema de archivos.\n\n");
+  return 0;
+}
+
+// Llama a la nueva syscall hello
+int
+builtin_hello(void)
+{
+  hello();
   return 0;
 }
 
@@ -850,6 +859,10 @@ handle_builtin(char *cmd_line)
   }
   if (strcmp(argv[0], "ayuda") == 0) {
     g_ctx.last_exit_status = builtin_ayuda();
+    return 1;
+  }
+  if (strcmp(argv[0], "hello") == 0) {
+    g_ctx.last_exit_status = builtin_hello();
     return 1;
   }
   if (strcmp(argv[0], "listar") == 0) {

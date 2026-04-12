@@ -146,6 +146,12 @@ UPROGS=\
 	$U/_forphan\
 	$U/_dorphan\
         $U/_EAFITossh\
+	$U/_hello\
+	$U/_strace\
+	$U/_ttrace\
+	$U/_tdumpvm\
+	$U/_tmemro\
+	$U/_tuargs\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

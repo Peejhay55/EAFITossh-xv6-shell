@@ -101,6 +101,8 @@ void            yield(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
 void            procdump(void);
+void            shm_init(void);
+void            shm_proc_exit(struct proc*);
 
 // swtch.S
 void            swtch(struct context*, struct context*);
@@ -169,6 +171,7 @@ int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
 int             ismapped(pagetable_t, uint64);
 uint64          vmfault(pagetable_t, uint64, int);
+void            vmprint(pagetable_t);
 
 // plic.c
 void            plicinit(void);

@@ -51,6 +51,7 @@ procinit(void)
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
+  shm_init();
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
@@ -158,6 +159,10 @@ freeproc(struct proc *p)
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
+  if(p->map_ro_va){
+    uvmunmap(p->pagetable, p->map_ro_va, 1, 1);
+  }
+
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -168,6 +173,9 @@ freeproc(struct proc *p)
   p->chan = 0;
   p->killed = 0;
   p->xstate = 0;
+  p->shm_attached = 0;
+  p->trace_mask = 0; // EAFITos: Limpiar máscara strace
+  p->map_ro_va = 0;
   p->state = UNUSED;
 }
 
@@ -241,7 +249,7 @@ growproc(int n)
 
   sz = p->sz;
   if(n > 0){
-    if(sz + n > TRAPFRAME) {
+    if(sz + n > SHM_VA) {
       return -1;
     }
     if((sz = uvmalloc(p->pagetable, sz, sz + n, PTE_W)) == 0) {
@@ -275,6 +283,9 @@ kfork(void)
     return -1;
   }
   np->sz = p->sz;
+
+  // EAFITos: Heredar la máscara trace
+  np->trace_mask = p->trace_mask;
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
@@ -330,6 +341,8 @@ kexit(int status)
 
   if(p == initproc)
     panic("init exiting");
+
+  shm_proc_exit(p);
 
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){

@@ -14,6 +14,41 @@ extern char etext[];
 
 extern char trampoline[];
 
+void
+_vmprint(pagetable_t pagetable, int level)
+{
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if(pte & PTE_V){
+      for(int j = 0; j <= level; j++){
+        printf(".. ");
+      }
+      uint64 pa = PTE2PA(pte);
+      printf("..%d: pte %p pa %p", i, (void*)pte, (void*)pa);
+      
+      if((pte & (PTE_R|PTE_W|PTE_X)) == 0){
+        printf("\n");
+        // this PTE points to a lower-level page table.
+        _vmprint((pagetable_t)pa, level + 1);
+      } else {
+        printf(" flags: ");
+        if(pte & PTE_R) printf("R"); else printf("-");
+        if(pte & PTE_W) printf("W"); else printf("-");
+        if(pte & PTE_X) printf("X"); else printf("-");
+        if(pte & PTE_U) printf("U"); else printf("-");
+        printf("\n");
+      }
+    }
+  }
+}
+
+void
+vmprint(pagetable_t pagetable)
+{
+  printf("page table %p\n", pagetable);
+  _vmprint(pagetable, 0);
+}
+
 pagetable_t
 kvmmake(void)
 {

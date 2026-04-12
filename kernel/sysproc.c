@@ -7,6 +7,40 @@
 #include "proc.h"
 #include "vm.h"
 
+struct {
+  struct spinlock lock;
+  char *page;
+  int refs;
+} shmstate;
+
+void
+shm_init(void)
+{
+  initlock(&shmstate.lock, "shmstate");
+  shmstate.page = 0;
+  shmstate.refs = 0;
+}
+
+void
+shm_proc_exit(struct proc *p)
+{
+  acquire(&shmstate.lock);
+  if(p->shm_attached){
+    uvmunmap(p->pagetable, SHM_VA, 1, 0);
+    p->shm_attached = 0;
+
+    if(shmstate.refs < 1)
+      panic("shm refs");
+    shmstate.refs--;
+
+    if(shmstate.refs == 0 && shmstate.page != 0){
+      kfree(shmstate.page);
+      shmstate.page = 0;
+    }
+  }
+  release(&shmstate.lock);
+}
+
 uint64
 sys_exit(void)
 {
@@ -57,7 +91,7 @@ sys_sbrk(void)
     // memory, vmfault() will allocate it.
     if(addr + n < addr)
       return -1;
-    if(addr + n > TRAPFRAME)
+    if(addr + n > SHM_VA)
       return -1;
     myproc()->sz += n;
   }
@@ -119,4 +153,100 @@ sys_rtctime(void)
   uint64 hi = rtc[1];
   uint64 ns = (hi << 32) | lo;
   return ns / 1000000000ULL;  // convert ns -> seconds
+}
+
+uint64
+sys_shm_open(void)
+{
+  struct proc *p = myproc();
+
+  acquire(&shmstate.lock);
+
+  if(p->shm_attached){
+    release(&shmstate.lock);
+    return SHM_VA;
+  }
+
+  if(shmstate.page == 0){
+    shmstate.page = kalloc();
+    if(shmstate.page == 0){
+      release(&shmstate.lock);
+      return -1;
+    }
+    memset(shmstate.page, 0, PGSIZE);
+  }
+
+  if(mappages(p->pagetable, SHM_VA, PGSIZE, (uint64)shmstate.page,
+              PTE_U | PTE_R | PTE_W) < 0){
+    if(shmstate.refs == 0){
+      kfree(shmstate.page);
+      shmstate.page = 0;
+    }
+    release(&shmstate.lock);
+    return -1;
+  }
+
+  p->shm_attached = 1;
+  shmstate.refs++;
+
+  release(&shmstate.lock);
+  return SHM_VA;
+}
+
+uint64
+sys_shm_close(void)
+{
+  shm_proc_exit(myproc());
+  return 0;
+}
+
+// EAFITos: Syscall hello
+uint64
+sys_hello(void)
+{
+  printf("Hello from EAFITos kernel!\n");
+  return 0;
+}
+
+// EAFITos: syscall strace (trace)
+uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);
+  myproc()->trace_mask = mask;
+  return 0;
+}
+
+// EAFITos: syscall dumpvm
+uint64
+sys_dumpvm(void)
+{
+  vmprint(myproc()->pagetable);
+  return 0;
+}
+
+// EAFITos: syscall map_ro
+uint64
+sys_map_ro(void)
+{
+  uint64 va;
+  argaddr(0, &va);
+  
+  va = PGROUNDDOWN(va);
+  char *mem = kalloc();
+  if(mem == 0)
+    return -1;
+    
+  memset(mem, 0, PGSIZE);
+  memmove(mem, "Mensaje corto de prueba desde el kernel (solo lectura)", 54);
+  
+  struct proc *p = myproc();
+  if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, PTE_R | PTE_U) != 0){
+    kfree(mem);
+    return -1;
+  }
+  
+  p->map_ro_va = va;
+  return 0;
 }

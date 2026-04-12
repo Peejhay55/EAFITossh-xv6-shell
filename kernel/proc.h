@@ -103,5 +103,8 @@ struct proc {
   struct context context;      // swtch() here to run process
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
+  int shm_attached;            // shared-memory page mapped at SHM_VA
   char name[16];               // Process name (debugging)
+  int trace_mask;              // EAFITos: Máscara para strace
+  uint64 map_ro_va;            // VA de la página RO mapeada
 };
