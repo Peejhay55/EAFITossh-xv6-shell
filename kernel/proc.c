@@ -147,6 +147,9 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  // Inicializar contador de Page Faults en 0
+  p->pf_count = 0;
+
   return p;
 }
 

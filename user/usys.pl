@@ -47,5 +47,6 @@ entry("hello");
 entry("trace");
 entry("dumpvm");
 entry("map_ro");
+entry("mapzero");
 entry("shm_open");
 entry("shm_close");

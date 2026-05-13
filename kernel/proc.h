@@ -81,6 +81,11 @@ struct trapframe {
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+struct vregion {
+  uint64 start;
+  int size;
+};
+
 // Per-process state
 struct proc {
   struct spinlock lock;
@@ -107,4 +112,6 @@ struct proc {
   char name[16];               // Process name (debugging)
   int trace_mask;              // EAFITos: Máscara para strace
   uint64 map_ro_va;            // VA de la página RO mapeada
+  int pf_count;                // Contador de Page Faults (Lazy Allocation)
+  struct vregion vreg;         // Región simulada para mmap
 };

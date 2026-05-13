@@ -74,27 +74,23 @@ uint64
 sys_sbrk(void)
 {
   uint64 addr;
-  int t;
   int n;
 
   argint(0, &n);
-  argint(1, &t);
   addr = myproc()->sz;
 
-  if(t == SBRK_EAGER || n < 0) {
-    if(growproc(n) < 0) {
+  // i. Eliminar la asignación física inmediata
+  // ii. Solo aumento sz del proceso (Lazy Allocation)
+  // Nota: Si n < 0, se mantiene la asignación inmediata para liberar memoria.
+  if(n < 0){
+    if(growproc(n) < 0)
       return -1;
-    }
   } else {
-    // Lazily allocate memory for this process: increase its memory
-    // size but don't allocate memory. If the processes uses the
-    // memory, vmfault() will allocate it.
-    if(addr + n < addr)
-      return -1;
-    if(addr + n > SHM_VA)
-      return -1;
+    // Solo actualizamos el tamaño virtual.
+    // No llamamos a growproc(n) para evitar kalloc inmediato.
     myproc()->sz += n;
   }
+  
   return addr;
 }
 
@@ -152,7 +148,31 @@ sys_rtctime(void)
   uint64 lo = rtc[0];   // reading TIME_LOW latches TIME_HIGH
   uint64 hi = rtc[1];
   uint64 ns = (hi << 32) | lo;
-  return ns / 1000000000ULL;  // convert ns -> seconds
+  return ns / 1000000000;
+}
+
+uint64
+sys_mapzero(void)
+{
+  int size;
+  struct proc *p = myproc();
+
+  argint(0, &size);
+  if(size <= 0)
+    return -1;
+
+  // Reserva rango virtual sin mapear físicamente:
+  // Colocamos la región justo después de sz, alineada a página.
+  uint64 start = PGROUNDUP(p->sz);
+  
+  // Guardamos la configuración de la región para usertrap()
+  p->vreg.start = start;
+  p->vreg.size = size;
+
+  // Actualizamos sz para que el kernel sepa que este rango es legal
+  p->sz = start + size;
+
+  return start;
 }
 
 uint64

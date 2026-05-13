@@ -29,6 +29,7 @@ int hello(void);
 int trace(int);
 int dumpvm(void);
 int map_ro(void*);
+int mapzero(int);
 
 void* shm_open(void);
 int shm_close(void);

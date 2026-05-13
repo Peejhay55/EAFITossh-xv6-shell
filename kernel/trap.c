@@ -72,9 +72,30 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-  } else if((r_scause() == 15 || r_scause() == 13) &&
-            vmfault(p->pagetable, r_stval(), (r_scause() == 13)? 1 : 0) != 0) {
-    // page fault on lazily-allocated page
+  } else if(r_scause() == 13 || r_scause() == 15){
+    // i. Load page fault (13) / ii. Store page fault (15)
+    uint64 va = r_stval(); // Dirección virtual que falló
+    
+    // 1. Verifica si stval está dentro de p->sz (límites legales del proceso)
+    // 2. Si está, intentamos asignar la página físicamente
+    if(va < p->sz && vmfault(p->pagetable, va, 0) != 0){
+      // Éxito: Se asignó y mapeó la página, incrementamos el contador
+      p->pf_count++;
+      
+      // c.i. Si el fault está en la región vreg, inicializar con patrón 'A'
+      if(va >= p->vreg.start && va < p->vreg.start + p->vreg.size){
+        uint64 pa = walkaddr(p->pagetable, va);
+        if(pa != 0){
+          memset((void*)pa, 'A', PGSIZE);
+        }
+      }
+      
+      printf("page fault: pid=%d pf_count=%d stval=%p\n", p->pid, p->pf_count, (void*)va);
+    } else {
+      // 3. Si no es legal o falla kalloc/mappages, matar el proceso
+      printf("page fault: pid=%d scause=%d stval=%p\n", p->pid, (int)r_scause(), (void*)va);
+      setkilled(p);
+    }
   } else {
     // EAFITos: store page fault detection
     if(r_scause() == 15){
